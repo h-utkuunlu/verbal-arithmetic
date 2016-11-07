@@ -1,0 +1,4 @@
+CP
+IS
+FUN
+TRUE
