@@ -3,7 +3,9 @@ def create(eq_file):
     eq = []
     for line in equation:
         eq.append(line.strip())
+    equation.close()
     return eq
+    
 
 def display(equation):
     max_len = 0
@@ -22,8 +24,6 @@ def display(equation):
     print("+ " + " "*(max_len - len(equation[-2])) + equation[-2])
     print("-"*(max_len+2))
     print(" "*(max_len - len(equation[-1])+2) + equation[-1])
-    
-    return
     
 def guess(equation):
     available = list(range(0, 10))
@@ -49,73 +49,112 @@ def guess(equation):
 
 def replace(equation, number):
     
+    eq = equation.copy()
+    
     letter = []
     rank = []
     
     i = 0
     j = 1
-    while i < len(equation):
-        while j <= len(equation[i]):
-            if not equation[i][-j].isalpha():
+    while i < len(eq):
+        while j <= len(eq[i]):
+            if not eq[i][-j].isalpha():
                 j += 1
             else:
-                letter.append(equation[i][-j])
+                letter.append(eq[i][-j])
                 rank.append(j)
                 break
         i += 1
         j = 1
-        
+    
     replace_char = letter[rank.index(min(rank))]
     
     i = 0
-    while i < len(equation):
-        new = equation[i].replace(replace_char, str(number[0]))
-        equation[i] = new
+    while i < len(eq):
+        new = eq[i].replace(replace_char, str(number))
+        eq[i] = new
         i += 1
         
-    return equation
+    return eq
 
 def accept(equation):
-    if reject(equation):
-        return False
-    else:  # At this point, all characters are legitimate numbers. So they can be converted        
-        sum_list = []
-        i = 0
-        while i < len(equation) - 1:
-            sum_list.append(int(equation[i]))
-            i += 1
-        
-        if sum(sum_list) == int(equation[-1]):
-            print("Found the solution")
-            return True
-        else:
-            print("Numbers are not correct")
-            return False
 
-def reject(equation):
+    #print(equation)
     full = ""
     for item in equation:
         if item[0] == "0":
-            print("One item starts with 0")
-            return True
+            return False
         full += item
+    
     for char in full:
         if char.isalpha():
-            print("Not all are characters")
-            return True
-    return False
+            return False
+            
+    # At this point, all characters are legitimate numbers. So they can be converted        
+    sum_list = []
+    i = 0
+    while i < len(equation) - 1:
+        sum_list.append(int(equation[i]))
+        i += 1
+    
+    if sum(sum_list) == int(equation[-1]):
+        #print("Found a solution")
+        return True
+    else:
+        return False
+
+def reject(equation):    
+    
+    #First digit check
+    
+    check_str = ""
+    for item in equation:
+        check_str += item[-1]
+    for char in check_str:
+        if char.isalpha(): # There are still digits to be changed
+            return False # Therefore, the procedure must continue
+    
+    # All first items are digits
+    first_digit = []
+    for char in check_str:
+        first_digit.append(int(char))
+    
+    if sum(first_digit[:-1])%10 != first_digit[-1]:
+        return True
+    else:
+        return False
 
 def solve(equation):
+    
     if accept(equation):
         return equation
-    elif guess(equation):
-        print("Can try more:", guess(equation))
-        equation2 = replace(equation, guess(equation))
-        print(equation2)
-        return solve(equation2)
-    else:
+    
+    elif not guess(equation):
         return []
     
-eq = create("equations/00.txt")
+    elif reject(equation):
+        return []
+                
+    else:
+        for num in guess(equation):
+            temp = solve(replace(equation, num))
+            
+            if temp:
+                return temp
+            
+eq = ["AB", "CB", "DBB"]#create("equations/00.txt")
+    
+for i in range(19):
+    
+    if len(str(i)) == 1:
+        i = "0"+str(i)
+    else:
+        i = str(i)
+            
+    eq = create("equations/"+i+".txt")
+    
+    display(eq)
+    print()
+    display(solve(eq))
+    print()
 
-print(solve(eq))
