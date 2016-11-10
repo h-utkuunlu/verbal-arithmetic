@@ -1,3 +1,5 @@
+import time
+
 def create(eq_file):
     equation = open(eq_file)
     eq = []
@@ -105,24 +107,45 @@ def accept(equation):
 
 def reject(equation):    
     
-    #First digit check
+    #print(equation)
     
-    check_str = ""
-    for item in equation:
-        check_str += item[-1]
-    for char in check_str:
-        if char.isalpha(): # There are still digits to be changed
-            return False # Therefore, the procedure must continue
+    #First letter position check
+    letter_pos = []
     
-    # All first items are digits
-    first_digit = []
-    for char in check_str:
-        first_digit.append(int(char))
+    for word in equation:
+        for char_pos in range(1, len(word)+1):
+            #print(word[-char_pos])
+            if word[-char_pos].isalpha():
+                letter_pos.append(char_pos-1)
+                break
+            
+    #print(letter_pos)
+    #time.sleep(0.01)
+  
+    level = min(letter_pos)
+    #print(level)
     
-    if sum(first_digit[:-1])%10 != first_digit[-1]:
+    if not level: #Ones digit has characters. Repeat
+        #print("Ones digit has characters")
+        #time.sleep(1)
+        return False
+    
+    until_level = []
+    
+    for word in equation:
+        until_level.append(int(word[-level:]))
+        
+    #print(until_level)
+    #time.sleep(1)
+    
+    if sum(until_level[:-1])%(10**level) != until_level[-1]: #Problem with equation so far
+        #print("I reject")
+        #time.sleep(0.05)
         return True
     else:
-        return False
+        #print("Looks right. Moving forward")
+        #time.sleep(1)
+        return False #So far, equation looks right. Proceed
 
 def solve(equation):
     
@@ -137,13 +160,14 @@ def solve(equation):
                 
     else:
         for num in guess(equation):
+            #print("Trying", num)
             temp = solve(replace(equation, num))
             
             if temp:
                 return temp
             
-eq = ["AB", "CB", "DBB"]#create("equations/00.txt")
-    
+#eq = create("equations/00.txt")
+
 for i in range(19):
     
     if len(str(i)) == 1:
@@ -153,8 +177,9 @@ for i in range(19):
             
     eq = create("equations/"+i+".txt")
     
-    display(eq)
     print()
-    display(solve(eq))
-    print()
+    start = time.time()
+    solve(eq)
+    dt = time.time()-start
+    print(i, "\t", dt)
 
